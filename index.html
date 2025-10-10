@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>問題ナビ</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --accent:#2563eb;
+      --accent-weak:#dbeafe;
+      --radius:14px;
+      --shadow:0 10px 30px rgba(0,0,0,.08);
+      --drawer-head:54px;
+
+      /* Compact row */
+      --row-pad-y:8px;
+      --row-pad-x:12px;
+      --row-gap:8px;
+      --row-radius:10px;
+      --row-font:0.95rem;
+      --badge-font:0.82rem;
+    }
+    *{box-sizing:border-box}
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      min-height:100dvh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+      color:var(--text);
+      background:linear-gradient(180deg,#fafafa, #eef2f7 60%, #e2e8f0);
+      display:flex; align-items:center; justify-content:center;
+      padding:18px;
+      -webkit-font-smoothing:antialiased;
+    }
+    .app{
+      width:min(920px,100%);
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:visible;
+      position:relative;
+      z-index:2;
+    }
+    /* 透明マスク：暗くしない */
+    .mask{
+      position:fixed; inset:0;
+      background:transparent;
+      display:none;
+      z-index:3;
+      touch-action:none;
+    }
+    .mask[data-open="true"]{ display:block }
+
+    header{
+      padding:14px 16px; border-bottom:1px solid var(--line);
+      background:linear-gradient(180deg,#fff, #f9fafb);
+    }
+    h1{margin:0; font-size:1.05rem; letter-spacing:.02em}
+    .sub{color:var(--muted); font-size:.88rem}
+    main{padding:14px 16px}
+    .tiles{
+      display:grid; gap:12px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    button.tile{
+      appearance:none; -webkit-appearance:none; cursor:pointer;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:14px;
+      text-align:left;
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      box-shadow:0 6px 18px rgba(0,0,0,.06);
+      transition:.2s transform ease, .2s box-shadow ease;
+      width:100%;
+    }
+    button.tile:hover{ transform:translateY(-1px); box-shadow:0 10px 26px rgba(0,0,0,.08) }
+    .tile .title{font-weight:700; font-size:1rem}
+    .tile .desc{color:var(--muted); font-size:.88rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 60vw;}
+    .chev{margin-left:auto; opacity:.7; transition: transform .2s ease}
+    .tile[aria-expanded="true"] .chev{ transform:rotate(90deg) }
+    .on{display:none; margin-left:8px; font-size:.8rem; color:#0f766e; background:#ccfbf1; border:1px solid #99f6e4; padding:.05em .4em; border-radius:8px}
+    .tile[aria-expanded="true"] .on{ display:inline-block }
+
+    /* Drawer */
+    .drawer{
+      margin-top:14px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+      display:none;
+    }
+    .drawer[aria-hidden="false"]{ display:block }
+    .drawer .head{
+      position:sticky; top:0; z-index:1;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:10px 10px; border-bottom:1px solid var(--line);
+      background:#f9fafb;
+      height: var(--drawer-head);
+    }
+    .drawer .head h2{margin:0; font-size:.98rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .close{
+      appearance:none; -webkit-appearance:none; cursor:pointer;
+      background:#fff; color:#111827; border:1px solid var(--line);
+      padding:6px 8px; border-radius:10px; font-size:.88rem;
+      flex:0 0 auto;
+    }
+    .close:hover{ background:#f3f4f6 }
+    .links{ display:grid; gap:8px; padding:10px; }
+
+    /* Row: コンパクト & 「開く　題名」 */
+    .row{
+      border:1px solid var(--line); border-radius:var(--row-radius); overflow:hidden; background:#fff;
+      font-size: var(--row-font);
+    }
+    .rowhead{
+      display:flex; align-items:center; gap:var(--row-gap);
+      width:100%; cursor:pointer; padding:var(--row-pad-y) var(--row-pad-x);
+      min-width:0; /* title の横スクロールに必須 */
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
+    .badge{
+      font-size:var(--badge-font); font-weight:700;
+      color:#1f2937; background:#dbeafe;
+      padding:.15em .55em; border-radius:999px; border:1px solid #bfdbfe;
+      flex:0 0 auto;
+    }
+    .title-wrap{ flex:1 1 auto; min-width:0; overflow:hidden; }
+    .title-scroll{
+      display:block;
+      overflow-x:auto; white-space:nowrap;
+      -webkit-overflow-scrolling: touch; /* iOS momentum */
+      scrollbar-width: thin;
+      mask-image: linear-gradient(to right, black 85%, transparent); /* 端にフェード（任意） */
+    }
+    .title-scroll::-webkit-scrollbar{ height:6px }
+    .title-scroll::-webkit-scrollbar-thumb{ background:#e5e7eb; border-radius:6px }
+    .arrow{ opacity:.6; transition: transform .2s ease; flex:0 0 auto; font-size:.9rem }
+    .row[aria-expanded="true"] .arrow{ transform: rotate(90deg) }
+    .rowhead:hover{ background:#f8fafc }
+
+    .children{
+      display:none; border-top:1px dashed #e5e7eb; background:#fcfdff;
+    }
+    .row[aria-expanded="true"] .children{ display:block }
+    .children .row{ border:0; border-top:1px dashed #eef2f7; border-radius:0; }
+
+    footer{
+      border-top:1px solid var(--line);
+      padding:10px 12px; color:#6b7280; font-size:.86rem; background:#fff;
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+    }
+
+    /* Mobile: bottom sheet with its own scroll */
+    @media (max-width:600px){
+      .drawer{
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 0;
+        width: min(920px, 100%);
+        height: 85vh;
+        max-height: 85vh;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 16px 40px rgba(0,0,0,.18);
+        z-index: 4;
+        display:none;
+        overflow: hidden; /* header sticky, body scroll */
+      }
+      .drawer[aria-hidden="false"]{ display:block; }
+      .drawer .links{
+        height: calc(85vh - var(--drawer-head));
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding-bottom: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="mask" id="mask" aria-hidden="true"></div>
+  <div class="app" aria-label="問題ナビ">
+    <header>
+      <h1>問題ナビ</h1>
+      <div class="sub">題名は横スクロールで閲覧可能／枠はコンパクト表示</div>
+    </header>
+    <main>
+      <div id="tiles" class="tiles"></div>
+      <div id="drawers"></div>
+    </main>
+    <footer>
+      <div>© <span id="y"></span> 問題ナビ</div>
+      <div></div>
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // ---- データ形式（必要に応じて編集） ----
+    const data = [
+      {
+        label: "過去問",
+        children: [
+          { label: "2020年 第一回 模擬試験（とても長い題名の例：ここを左右にスワイプして最後まで読めます）", url: "https://0213mano-png.github.io/2020_1/" },
+          { label: "2020-2", url: "https://0213mano-png.github.io/2020_2/" },
+          { label: "2020-3", url: "https://0213mano-png.github.io/2020_3/" }
+        ]
+      },
+      {
+        label: "項目別",
+        children: [
+          { label: "1（長い題名のテスト。横スクロール）", url: "https://0213mano-png.github.io/1/" },
+          { label: "2", url: "https://0213mano-png.github.io/2/" },
+          { label: "3", url: "https://0213mano-png.github.io/3/" }
+        ]
+      }
+    ];
+
+    const tilesWrap = document.getElementById("tiles");
+    const drawersWrap = document.getElementById("drawers");
+    const mask = document.getElementById("mask");
+
+    function closeAll(){
+      for(const b of tilesWrap.querySelectorAll(".tile")) b.setAttribute("aria-expanded","false");
+      for(const d of drawersWrap.querySelectorAll(".drawer")) d.setAttribute("aria-hidden","true");
+      mask.dataset.open = "false";
+      mask.setAttribute("aria-hidden","true");
+    }
+
+    function openTarget(tile, drawer){
+      closeAll();
+      tile.setAttribute("aria-expanded","true");
+      drawer.setAttribute("aria-hidden","false");
+      mask.dataset.open = "true";
+      mask.setAttribute("aria-hidden","false");
+      setTimeout(()=> drawer.scrollIntoView({behavior:"smooth", block:"start"}), 0);
+    }
+
+    function toggleTarget(tile, drawer){
+      const isOpen = tile.getAttribute("aria-expanded") === "true";
+      if(isOpen){
+        closeAll();
+      }else{
+        openTarget(tile, drawer);
+      }
+    }
+
+    function makeTile(id, title, hint){
+      const btn = document.createElement("button");
+      btn.className = "tile";
+      btn.id = `tile-${id}`;
+      btn.setAttribute("aria-expanded","false");
+      btn.setAttribute("aria-controls", `drawer-${id}`);
+      btn.innerHTML = `
+        <div>
+          <div class="title">${title} <span class="on">一覧を表示中</span></div>
+          <div class="desc">${hint || ""}</div>
+        </div>
+        <span class="chev" aria-hidden="true">▶</span>
+      `;
+      return btn;
+    }
+    function makeDrawer(id, title){
+      const sec = document.createElement("section");
+      sec.className = "drawer";
+      sec.id = `drawer-${id}`;
+      sec.setAttribute("aria-hidden","true");
+      sec.innerHTML = `
+        <div class="head">
+          <h2>${title}</h2>
+          <button class="close" type="button" data-close>閉じる</button>
+        </div>
+        <div class="links" id="list-${id}" role="list"></div>`;
+      return sec;
+    }
+
+    // 横スクロールとタップの競合を避ける：rowhead側で管理
+    function attachRowInteractions(headEl, onActivate){
+      let startX=0, startY=0, movedX=0, movedY=0, isSwiping=false;
+      headEl.addEventListener("touchstart", (e)=>{
+        const t = e.touches[0]; startX=t.clientX; startY=t.clientY; movedX=0; movedY=0; isSwiping=false;
+      }, {passive:true});
+      headEl.addEventListener("touchmove", (e)=>{
+        const t = e.touches[0];
+        movedX = Math.abs(t.clientX-startX);
+        movedY = Math.abs(t.clientY-startY);
+        if(movedX>8 && movedX>movedY){ isSwiping=true; }
+      }, {passive:true});
+      headEl.addEventListener("touchend", (e)=>{
+        if(isSwiping){ return; } // 横に動いていたらクリックしない
+        onActivate();
+      }, {passive:true});
+      headEl.addEventListener("click", (e)=>{
+        // クリック（マウス/タップ）でも発火。ただし直前に横移動あれば無視。
+        if(isSwiping){ return; }
+        onActivate();
+      });
+    }
+
+    function makeRow({label, url, children}){
+      const row = document.createElement("div");
+      row.className = "row";
+      row.setAttribute("role","listitem");
+
+      const head = document.createElement("div");
+      head.className = "rowhead";
+      head.setAttribute("role","button");
+
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      badge.textContent = (children && children.length) ? "選択" : "開く";
+
+      const titleWrap = document.createElement("div");
+      titleWrap.className = "title-wrap";
+      const titleScroll = document.createElement("span");
+      titleScroll.className = "title-scroll";
+      titleScroll.textContent = label;
+      titleWrap.appendChild(titleScroll);
+
+      head.appendChild(badge);
+      head.appendChild(titleWrap);
+
+      if(children && children.length){
+        const arrow = document.createElement("span");
+        arrow.className = "arrow";
+        arrow.textContent = "▶";
+        head.appendChild(arrow);
+      }
+
+      row.appendChild(head);
+
+      if(children && children.length){
+        const kids = document.createElement("div");
+        kids.className = "children";
+        for(const c of children){
+          kids.appendChild(makeRow(c));
+        }
+        row.appendChild(kids);
+        attachRowInteractions(head, ()=>{
+          const exp = row.getAttribute("aria-expanded") === "true";
+          row.setAttribute("aria-expanded", exp ? "false" : "true");
+        });
+      }else if(url){
+        attachRowInteractions(head, ()=> window.open(url, "_blank", "noopener,noreferrer"));
+      }
+      return row;
+    }
+
+    function renderCategory(cat, idx){
+      const id = `c${idx}`;
+      const hint = (cat.children || []).slice(0,3).map(n => n.label).join(" / ");
+      const tile = makeTile(id, cat.label, hint);
+      const drawer = makeDrawer(id, cat.label);
+      tilesWrap.appendChild(tile);
+      drawersWrap.appendChild(drawer);
+
+      const list = drawer.querySelector(`#list-${id}`);
+      (cat.children || []).forEach(child => list.appendChild(makeRow(child)));
+
+      tile.addEventListener("click", () => toggleTarget(tile, drawer));
+      drawer.querySelector("[data-close]").addEventListener("click", closeAll);
+    }
+
+    data.forEach((cat, i) => renderCategory(cat, i));
+    mask.addEventListener("click", closeAll);
+  </script>
+</body>
+</html>
