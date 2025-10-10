@@ -17,7 +17,6 @@
       --shadow:0 10px 30px rgba(0,0,0,.08);
       --drawer-head:54px;
 
-      /* Compact row */
       --row-pad-y:8px;
       --row-pad-x:12px;
       --row-gap:8px;
@@ -47,37 +46,17 @@
       position:relative;
       z-index:2;
     }
-    /* 透明マスク：暗くしない */
-    .mask{
-      position:fixed; inset:0;
-      background:transparent;
-      display:none;
-      z-index:3;
-      touch-action:none;
-    }
+    .mask{ position:fixed; inset:0; background:transparent; display:none; z-index:3; touch-action:none; }
     .mask[data-open="true"]{ display:block }
 
-    header{
-      padding:14px 16px; border-bottom:1px solid var(--line);
-      background:linear-gradient(180deg,#fff, #f9fafb);
-    }
+    header{ padding:14px 16px; border-bottom:1px solid var(--line); background:linear-gradient(180deg,#fff, #f9fafb) }
     h1{margin:0; font-size:1.05rem; letter-spacing:.02em}
     main{padding:14px 16px}
-    .tiles{
-      display:grid; gap:12px;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    }
+    .tiles{ display:grid; gap:12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
     button.tile{
-      appearance:none; -webkit-appearance:none; cursor:pointer;
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:14px;
-      text-align:left;
-      display:flex; gap:10px; align-items:center; justify-content:space-between;
-      box-shadow:0 6px 18px rgba(0,0,0,.06);
-      transition:.2s transform ease, .2s box-shadow ease;
-      width:100%;
+      appearance:none; cursor:pointer; background:#fff; border:1px solid var(--line);
+      border-radius:12px; padding:14px; text-align:left; display:flex; gap:10px; align-items:center; justify-content:space-between;
+      box-shadow:0 6px 18px rgba(0,0,0,.06); transition:.2s transform ease, .2s box-shadow ease; width:100%;
     }
     button.tile:hover{ transform:translateY(-1px); box-shadow:0 10px 26px rgba(0,0,0,.08) }
     .tile .title{font-weight:700; font-size:1rem}
@@ -87,107 +66,50 @@
     .on{display:none; margin-left:8px; font-size:.8rem; color:#0f766e; background:#ccfbf1; border:1px solid #99f6e4; padding:.05em .4em; border-radius:8px}
     .tile[aria-expanded="true"] .on{ display:inline-block }
 
-    /* Drawer */
-    .drawer{
-      margin-top:14px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      background:#fff;
-      display:none;
-    }
+    .drawer{ margin-top:14px; border:1px solid var(--line); border-radius:12px; background:#fff; display:none; }
     .drawer[aria-hidden="false"]{ display:block }
     .drawer .head{
-      position:sticky; top:0; z-index:1;
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding:10px 10px; border-bottom:1px solid var(--line);
-      background:#f9fafb;
-      height: var(--drawer-head);
+      position:sticky; top:0; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:10px 10px; border-bottom:1px solid var(--line); background:#f9fafb; height: var(--drawer-head);
     }
     .drawer .head h2{margin:0; font-size:.98rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-    .close{
-      appearance:none; -webkit-appearance:none; cursor:pointer;
-      background:#fff; color:#111827; border:1px solid var(--line);
-      padding:6px 8px; border-radius:10px; font-size:.88rem;
-      flex:0 0 auto;
-    }
+    .close{ appearance:none; cursor:pointer; background:#fff; color:#111827; border:1px solid var(--line); padding:6px 8px; border-radius:10px; font-size:.88rem; flex:0 0 auto; }
     .close:hover{ background:#f3f4f6 }
     .links{ display:grid; gap:8px; padding:10px; }
 
-    /* Row: コンパクト & 「開く　題名」 */
-    .row{
-      border:1px solid var(--line); border-radius:var(--row-radius); overflow:hidden; background:#fff;
-      font-size: var(--row-font);
-    }
-    .rowhead{
-      display:flex; align-items:center; gap:var(--row-gap);
-      width:100%; padding:var(--row-pad-y) var(--row-pad-x);
-      min-width:0; user-select:none;
-    }
-
-    /* 開くボタン（button要素） */
+    .row{ border:1px solid var(--line); border-radius:var(--row-radius); overflow:hidden; background:#fff; font-size: var(--row-font); }
+    .rowhead{ display:flex; align-items:center; gap:var(--row-gap); width:100%; padding:var(--row-pad-y) var(--row-pad-x); min-width:0; user-select:none; }
     .open-btn{
-      font-size:var(--badge-font); font-weight:700;
-      color:#fff; background:var(--accent);
-      padding:.25em .75em; border-radius:999px;
-      text-decoration:none; display:inline-block;
-      border:1px solid #1d4ed8;
-      flex:0 0 auto;
-      cursor:pointer;
+      font-size:var(--badge-font); font-weight:700; color:#fff; background:var(--accent);
+      padding:.25em .75em; border-radius:999px; text-decoration:none; display:inline-block; border:1px solid #1d4ed8; flex:0 0 auto; cursor:pointer;
     }
     .open-btn:hover{ background:#1d4ed8 }
-
-    /* 親行でのみ使うバッジ（「選択」） */
     .badge{
-      font-size:var(--badge-font); font-weight:700;
-      color:#1f2937; background:#dbeafe;
-      padding:.15em .55em; border-radius:999px; border:1px solid #bfdbfe;
-      flex:0 0 auto;
+      font-size:var(--badge-font); font-weight:700; color:#1f2937; background:#dbeafe;
+      padding:.15em .55em; border-radius:999px; border:1px solid #bfdbfe; flex:0 0 auto;
     }
-
     .title-wrap{ flex:1 1 auto; min-width:0; overflow:hidden; }
-    .title-scroll{
-      display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; /* 横スクロール→省略表示 */
-    }
-
+    .title-scroll{ display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .arrow{ opacity:.6; transition: transform .2s ease; flex:0 0 auto; font-size:.9rem }
     .row[aria-expanded="true"] .arrow{ transform: rotate(90deg) }
     .rowhead:hover{ background:#f8fafc }
 
-    .children{
-      display:none; border-top:1px dashed #e5e7eb; background:#fcfdff;
-    }
+    .children{ display:none; border-top:1px dashed #e5e7eb; background:#fcfdff; }
     .row[aria-expanded="true"] .children{ display:block }
     .children .row{ border:0; border-top:1px dashed #eef2f7; border-radius:0; }
 
-    footer{
-      border-top:1px solid var(--line);
-      padding:10px 12px; color:#6b7280; font-size:.86rem; background:#fff;
-      display:flex; justify-content:space-between; align-items:center; gap:10px;
-    }
+    footer{ border-top:1px solid var(--line); padding:10px 12px; color:#6b7280; font-size:.86rem; background:#fff; display:flex; justify-content:space-between; align-items:center; gap:10px; }
 
-    /* Mobile bottom sheet */
     @media (max-width:600px){
       .drawer{
-        position: fixed;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 0;
-        width: min(920px, 100%);
-        height: 85vh;
-        max-height: 85vh;
-        border-radius: 16px 16px 0 0;
-        box-shadow: 0 16px 40px rgba(0,0,0,.18);
-        z-index: 4;
-        display:none;
-        overflow: hidden; /* header sticky, body scroll */
+        position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: min(920px, 100%);
+        height: 85vh; max-height: 85vh; border-radius: 16px 16px 0 0; box-shadow: 0 16px 40px rgba(0,0,0,.18);
+        z-index: 4; display:none; overflow: hidden;
       }
       .drawer[aria-hidden="false"]{ display:block; }
       .drawer .links{
         height: calc(85vh - var(--drawer-head));
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
-        padding-bottom: 12px;
+        overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding-bottom: 12px;
       }
     }
   </style>
@@ -195,9 +117,7 @@
 <body>
   <div class="mask" id="mask" aria-hidden="true"></div>
   <div class="app" aria-label="模擬試験集">
-    <header>
-      <h1>模擬試験集</h1>
-    </header>
+    <header><h1>模擬試験集</h1></header>
     <main>
       <div id="tiles" class="tiles"></div>
       <div id="drawers"></div>
@@ -211,10 +131,9 @@
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // ---- データ形式（必要に応じて編集） ----
     const data = [
       {
-        label: "過去問",
+        label: "過去分",
         children: [
           { label: "2020年 第1回診療情報管理士模擬試験", url: "https://0213mano-png.github.io/2020_1/" },
           { label: "2020年 第2回診療情報管理士模擬試験", url: "https://0213mano-png.github.io/2020_2/" },
@@ -271,14 +190,10 @@
 
     function toggleTarget(tile, drawer){
       const isOpen = tile.getAttribute("aria-expanded") === "true";
-      if(isOpen){
-        closeAll();
-      }else{
-        openTarget(tile, drawer);
-      }
+      if(isOpen){ closeAll(); } else { openTarget(tile, drawer); }
     }
 
-    function makeTile(id, title, hint){
+    function makeTile(id, title){
       const btn = document.createElement("button");
       btn.className = "tile";
       btn.id = `tile-${id}`;
@@ -287,7 +202,7 @@
       btn.innerHTML = `
         <div>
           <div class="title">${title} <span class="on">一覧を表示中</span></div>
-          <div class="desc">${hint || ""}</div>
+          <div class="desc"></div>
         </div>
         <span class="chev" aria-hidden="true">▶</span>
       `;
@@ -307,38 +222,24 @@
       return sec;
     }
 
-    /* ▼ 「開く」ボタン（URL専用） */
-    function makeOpenButton(url){
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'open-btn';
-      btn.textContent = '開く';
+    // ▼ アンカー版「開く」リンクを作成（伝播停止）
+    function makeOpenLink(url){
+      const a = document.createElement('a');
+      a.className = 'open-btn';
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = '開く';
 
-      let tapped = false;
-
-      // 伝播停止：親の開閉を防ぐ
-      btn.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
-
-      // タップ（iOSの二重発火を考慮）
-      btn.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        tapped = true;
-        window.open(url, '_blank', 'noopener,noreferrer');
-        setTimeout(()=> tapped=false, 400);
-      }, {passive:true});
-
-      // クリック
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if(tapped) return;
-        window.open(url, '_blank', 'noopener,noreferrer');
-      });
-
-      return btn;
+      const stop = (e)=> e.stopPropagation();
+      a.addEventListener('pointerdown', stop);
+      a.addEventListener('click', stop);
+      a.addEventListener('touchstart', stop, {passive:true});
+      a.addEventListener('touchend', stop, {passive:true});
+      return a;
     }
-    /* ▲ */
 
-    // 親行でのみタップで展開
+    // 親行の開閉用
     function attachParentInteractions(headEl, rowEl){
       let startX=0, startY=0, movedX=0, movedY=0, isSwiping=false;
       headEl.addEventListener("touchstart", (e)=>{
@@ -369,7 +270,6 @@
       const head = document.createElement("div");
       head.className = "rowhead";
 
-      // 子あり：展開用（クリックでURLは開かない）
       if(children && children.length){
         const badge = document.createElement("span");
         badge.className = "badge";
@@ -393,17 +293,15 @@
 
         const kids = document.createElement("div");
         kids.className = "children";
-        for(const c of children){
-          kids.appendChild(makeRow(c));
-        }
+        for(const c of children){ kids.appendChild(makeRow(c)); }
         row.appendChild(kids);
+
         attachParentInteractions(head, row);
         return row;
       }
 
-      // 子なし＝リーフ：左に「開く」ボタン、右に題名（クリックでURLは開かない）
       if(url){
-        const openBtn = makeOpenButton(url);
+        const openA = makeOpenLink(url);
 
         const titleWrap = document.createElement("div");
         titleWrap.className = "title-wrap";
@@ -412,17 +310,16 @@
         titleScroll.textContent = label;
         titleWrap.appendChild(titleScroll);
 
-        head.appendChild(openBtn);
+        head.appendChild(openA);
         head.appendChild(titleWrap);
         row.appendChild(head);
       }
-
       return row;
     }
 
     function renderCategory(cat, idx){
       const id = `c${idx}`;
-      const tile = makeTile(id, cat.label, "");
+      const tile = makeTile(id, cat.label);
       const drawer = makeDrawer(id, cat.label);
       tilesWrap.appendChild(tile);
       drawersWrap.appendChild(drawer);
