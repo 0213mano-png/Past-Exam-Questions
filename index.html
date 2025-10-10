@@ -375,7 +375,7 @@
     function renderCategory(cat, idx){
       const id = `c${idx}`;
       const hint = (cat.children || []).slice(0,3).map(n => n.label).join(" / ");
-      const tile = makeTile(id, cat.label, hint);
+      const tile = makeTile(id, cat.label, "");
       const drawer = makeDrawer(id, cat.label);
       tilesWrap.appendChild(tile);
       drawersWrap.appendChild(drawer);
