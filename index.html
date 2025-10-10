@@ -62,7 +62,6 @@
       background:linear-gradient(180deg,#fff, #f9fafb);
     }
     h1{margin:0; font-size:1.05rem; letter-spacing:.02em}
-    .sub{color:var(--muted); font-size:.88rem}
     main{padding:14px 16px}
     .tiles{
       display:grid; gap:12px;
@@ -107,7 +106,7 @@
     .drawer .head h2{margin:0; font-size:.98rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .close{
       appearance:none; -webkit-appearance:none; cursor:pointer;
-      background:#fff; color:#111827; border:1px solid #var(--line);
+      background:#fff; color:#111827; border:1px solid var(--line);
       padding:6px 8px; border-radius:10px; font-size:.88rem;
       flex:0 0 auto;
     }
@@ -125,7 +124,7 @@
       min-width:0; user-select:none;
     }
 
-    /* 開くボタン（a要素） */
+    /* 開くボタン（button要素） */
     .open-btn{
       font-size:var(--badge-font); font-weight:700;
       color:#fff; background:var(--accent);
@@ -133,6 +132,7 @@
       text-decoration:none; display:inline-block;
       border:1px solid #1d4ed8;
       flex:0 0 auto;
+      cursor:pointer;
     }
     .open-btn:hover{ background:#1d4ed8 }
 
@@ -145,9 +145,8 @@
     }
 
     .title-wrap{ flex:1 1 auto; min-width:0; overflow:hidden; }
-    /* 横スクロールを廃止して…省略表示に */
     .title-scroll{
-      display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; /* 横スクロール→省略表示 */
     }
 
     .arrow{ opacity:.6; transition: transform .2s ease; flex:0 0 auto; font-size:.9rem }
@@ -215,7 +214,7 @@
     // ---- データ形式（必要に応じて編集） ----
     const data = [
       {
-        label: "試験別",
+        label: "過去問",
         children: [
           { label: "2020年 第1回診療情報管理士模擬試験", url: "https://0213mano-png.github.io/2020_1/" },
           { label: "2020年 第2回診療情報管理士模擬試験", url: "https://0213mano-png.github.io/2020_2/" },
@@ -308,6 +307,37 @@
       return sec;
     }
 
+    /* ▼ 「開く」ボタン（URL専用） */
+    function makeOpenButton(url){
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'open-btn';
+      btn.textContent = '開く';
+
+      let tapped = false;
+
+      // 伝播停止：親の開閉を防ぐ
+      btn.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
+
+      // タップ（iOSの二重発火を考慮）
+      btn.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        tapped = true;
+        window.open(url, '_blank', 'noopener,noreferrer');
+        setTimeout(()=> tapped=false, 400);
+      }, {passive:true});
+
+      // クリック
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if(tapped) return;
+        window.open(url, '_blank', 'noopener,noreferrer');
+      });
+
+      return btn;
+    }
+    /* ▲ */
+
     // 親行でのみタップで展開
     function attachParentInteractions(headEl, rowEl){
       let startX=0, startY=0, movedX=0, movedY=0, isSwiping=false;
@@ -373,12 +403,7 @@
 
       // 子なし＝リーフ：左に「開く」ボタン、右に題名（クリックでURLは開かない）
       if(url){
-        const openA = document.createElement("a");
-        openA.className = "open-btn";
-        openA.href = url;
-        openA.target = "_blank";
-        openA.rel = "noopener noreferrer";
-        openA.textContent = "開く";
+        const openBtn = makeOpenButton(url);
 
         const titleWrap = document.createElement("div");
         titleWrap.className = "title-wrap";
@@ -387,7 +412,7 @@
         titleScroll.textContent = label;
         titleWrap.appendChild(titleScroll);
 
-        head.appendChild(openA);
+        head.appendChild(openBtn);
         head.appendChild(titleWrap);
         row.appendChild(head);
       }
