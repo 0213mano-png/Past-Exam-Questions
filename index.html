@@ -12,7 +12,6 @@
       --muted:#6b7280;
       --line:#e5e7eb;
       --accent:#2563eb;
-      --accent-weak:#dbeafe;
       --radius:14px;
       --shadow:0 10px 30px rgba(0,0,0,.08);
       --drawer-head:54px;
@@ -40,7 +39,7 @@
       width:min(920px,100%);
       background:var(--card);
       border:1px solid var(--line);
-      border-radius:var(--radius);
+      border-radius:14px;
       box-shadow:var(--shadow);
       overflow:visible;
       position:relative;
@@ -123,8 +122,7 @@
       <div id="drawers"></div>
     </main>
     <footer>
-      <div>© <span id="y"></span> 模擬試験集</div>
-      <div></div>
+      <div>© <span id="y"></span> 模擬試験集</div><div></div>
     </footer>
   </div>
 
@@ -133,7 +131,7 @@
 
     const data = [
       {
-        label: "過去分",
+        label: "過去問",
         children: [
           { label: "2020年 第1回診療情報管理士模擬試験", url: "https://0213mano-png.github.io/2020_1/" },
           { label: "2020年 第2回診療情報管理士模擬試験", url: "https://0213mano-png.github.io/2020_2/" },
@@ -222,24 +220,7 @@
       return sec;
     }
 
-    // ▼ アンカー版「開く」リンクを作成（伝播停止）
-    function makeOpenLink(url){
-      const a = document.createElement('a');
-      a.className = 'open-btn';
-      a.href = url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.textContent = '開く';
-
-      const stop = (e)=> e.stopPropagation();
-      a.addEventListener('pointerdown', stop);
-      a.addEventListener('click', stop);
-      a.addEventListener('touchstart', stop, {passive:true});
-      a.addEventListener('touchend', stop, {passive:true});
-      return a;
-    }
-
-    // 親行の開閉用
+    // 親行の開閉（リーフ行には付けない）
     function attachParentInteractions(headEl, rowEl){
       let startX=0, startY=0, movedX=0, movedY=0, isSwiping=false;
       headEl.addEventListener("touchstart", (e)=>{
@@ -300,8 +281,15 @@
         return row;
       }
 
+      // ▼ リーフ行：a要素で確実に開く。親への伝播は止める（inlineで確実）
       if(url){
-        const openA = makeOpenLink(url);
+        const openA = document.createElement('a');
+        openA.className = 'open-btn';
+        openA.href = url;
+        openA.target = '_blank';
+        openA.rel = 'noopener noreferrer';
+        openA.textContent = '開く';
+        openA.setAttribute('onclick', 'event.stopPropagation()'); // ← これがポイント
 
         const titleWrap = document.createElement("div");
         titleWrap.className = "title-wrap";
