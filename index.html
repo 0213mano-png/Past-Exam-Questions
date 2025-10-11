@@ -85,16 +85,25 @@
     }
     .links{ padding:12px }
 
-    /* Drawer内：カードグリッド（カード全体がリンク） */
+    /* Drawer内：横並びスクロールのレール */
     .section-title{ margin:0 0 10px; font-size:.95rem; color:#374151 }
-    .grid{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)) }
+    .rail{
+      display:flex; gap:12px; overflow-x:auto; padding-bottom:8px;
+      -webkit-overflow-scrolling:touch; scroll-snap-type:x proximity;
+    }
+    .rail::-webkit-scrollbar{ height:8px }
+    .rail::-webkit-scrollbar-thumb{ background:#e5e7eb; border-radius:8px }
+
+    /* カード（a要素がそのままカード） */
     .card{
-      display:block; /* a要素をブロック化 */
+      display:block;
       border:1px solid var(--line); border-radius:12px; padding:12px; background:#fff;
       box-shadow:0 4px 12px rgba(0,0,0,.06);
       text-decoration:none; color:inherit;
       transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
       cursor:pointer;
+      flex:0 0 260px;            /* 横幅を固定して横並び */
+      scroll-snap-align:start;   /* スクロール位置が揃いやすい */
     }
     .card:hover{ transform:translateY(-1px); box-shadow:0 8px 18px rgba(0,0,0,.08); border-color:#d1d5db }
     .card:focus-visible{ outline:3px solid #bfdbfe; outline-offset:2px }
@@ -118,6 +127,7 @@
         height: calc(85vh - var(--drawer-head));
         overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding-bottom: 12px;
       }
+      .card{ flex-basis: 80%; } /* モバイルはカードを少し広めに */
     }
   </style>
 </head>
@@ -254,14 +264,15 @@
       sectionTitle.className = 'section-title';
       sectionTitle.textContent = cat.label;
 
-      const grid = document.createElement('div');
-      grid.className = 'grid';
-      grid.setAttribute('role','list');
+      // ★ 横スクロールのレールに変更（grid → rail）
+      const rail = document.createElement('div');
+      rail.className = 'rail';
+      rail.setAttribute('role','list');
 
-      (cat.children || []).forEach(child => grid.appendChild(makeCardLink(child)));
+      (cat.children || []).forEach(child => rail.appendChild(makeCardLink(child)));
 
       list.appendChild(sectionTitle);
-      list.appendChild(grid);
+      list.appendChild(rail);
 
       tile.addEventListener("click", () => toggleTarget(tile, drawer));
       drawer.querySelector("[data-close]").addEventListener("click", closeAll);
