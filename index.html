@@ -79,7 +79,7 @@
     }
     .links{ padding:12px }
 
-    /* ====== 縦並びの行（左：開くピル / 右：横スクロール題名） ====== */
+    /* ====== 縦並びの行（題名のみ・横スクロール対応） ====== */
     .vlist{ display:grid; gap:12px }
     .row{
       border:1px solid var(--line); border-radius:var(--row-radius); background:#fff;
@@ -92,13 +92,6 @@
       width:100%; padding:var(--row-pad-y) var(--row-pad-x);
       min-width:0; user-select:none; cursor:pointer;
     }
-    .open-pill{
-      font-size:var(--badge-font); font-weight:700;
-      color:#1d4ed8; background:#dbeafe; border:1px solid #bfdbfe;
-      padding:.2em .65em; border-radius:999px; flex:0 0 auto;
-      text-decoration:none; display:inline-block;
-    }
-    .open-pill:hover{ background:#bfdbfe }
     .title-wrap{ flex:1 1 auto; min-width:0 }
     .title-scroll{
       display:block; overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch;
@@ -141,7 +134,7 @@
   </div>
 
   <script>
-    // 年号
+    // 年号（nullガード付）
     const yEl = document.getElementById('y'); if (yEl) yEl.textContent = new Date().getFullYear();
 
     /* ====== データ ====== */
@@ -231,32 +224,30 @@
       return sec;
     }
 
-    // 1行（childrenの項目）
+    // 1行（childrenの項目）: 題名のみ / 行クリック & Enter/Space で開く
     function makeRowItem({label, url}){
       const row  = document.createElement('div'); row.className = 'row';
       const head = document.createElement('div'); head.className = 'rowhead';
+      head.setAttribute('role','link');   // アクセシビリティ
+      head.setAttribute('tabindex','0');  // キーボードでフォーカス可能
 
-      // 「開く」ピル（aタグ）
-      const openA = document.createElement('a');
-      openA.className = 'open-pill';
-      openA.href = url; openA.target = '_blank'; openA.rel = 'noopener noreferrer';
-      openA.textContent = '開く';
-      // 伝播停止：行クリック(下のwindow.open)と二重発火しないように
-      openA.addEventListener('pointerdown', e=>e.stopPropagation());
-      openA.addEventListener('click', e=>e.stopPropagation());
-
-      // 題名（横スクロール）
       const titleWrap   = document.createElement('div');  titleWrap.className   = 'title-wrap';
       const titleScroll = document.createElement('span'); titleScroll.className = 'title-scroll';
       titleScroll.textContent = label;
       titleWrap.appendChild(titleScroll);
 
-      // 行全体クリックでも開く
+      // 行クリックで開く
       head.addEventListener('click', ()=> {
         window.open(url, '_blank', 'noopener,noreferrer');
       });
+      // Enter / Space でも開く
+      head.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' ' || e.code === 'Space'){
+          e.preventDefault();
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+      });
 
-      head.appendChild(openA);
       head.appendChild(titleWrap);
       row.appendChild(head);
       return row;
