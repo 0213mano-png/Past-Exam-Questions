@@ -35,7 +35,7 @@
       position:relative;
     }
 
-    /* 透明マスク：外側クリックで閉じる用（ドロワーの背面になるよう z=3） */
+    /* 透明マスク（外側クリックで閉じる用） */
     .mask{
       position:fixed; inset:0; background:transparent;
       display:none; z-index:3; touch-action:none;
@@ -66,10 +66,10 @@
     .chev{ margin-left:auto; opacity:.7; transition: transform .2s ease }
     .tile[aria-expanded="true"] .chev{ transform:rotate(90deg) }
 
-    /* Drawer（PC幅でもマスクより前面に出す：z=4） */
+    /* Drawer（PC幅でもマスクより前面に：z=4） */
     .drawer{
       margin-top:14px; border:1px solid var(--line); border-radius:12px; background:#fff;
-      display:none; position:relative; z-index:4; /* ← 重要（マスクz=3より前） */
+      display:none; position:relative; z-index:4;
     }
     .drawer[aria-hidden="false"]{ display:block }
     .drawer .head{
@@ -85,23 +85,21 @@
     }
     .links{ padding:12px }
 
-    /* Drawer内のカードグリッド */
+    /* Drawer内：カードグリッド（カード全体がリンク） */
     .section-title{ margin:0 0 10px; font-size:.95rem; color:#374151 }
     .grid{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)) }
     .card{
+      display:block; /* a要素をブロック化 */
       border:1px solid var(--line); border-radius:12px; padding:12px; background:#fff;
       box-shadow:0 4px 12px rgba(0,0,0,.06);
-      display:flex; flex-direction:column; gap:8px;
+      text-decoration:none; color:inherit;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      cursor:pointer;
     }
-    .card h3{ margin:0; font-size:1rem; line-height:1.35 }
+    .card:hover{ transform:translateY(-1px); box-shadow:0 8px 18px rgba(0,0,0,.08); border-color:#d1d5db }
+    .card:focus-visible{ outline:3px solid #bfdbfe; outline-offset:2px }
+    .card h3{ margin:0 0 6px; font-size:1rem; line-height:1.35 }
     .card p{ margin:0; font-size:.9rem; color:var(--muted) }
-    .actions{ margin-top:6px }
-    .btn{
-      display:inline-block; font-weight:700; font-size:.9rem; text-decoration:none;
-      border:1px solid #1d4ed8; color:#fff; background:var(--accent);
-      padding:.42em .9em; border-radius:999px; cursor:pointer;
-    }
-    .btn:hover{ background:#1d4ed8 }
 
     footer{
       border-top:1px solid var(--line);
@@ -114,8 +112,7 @@
       .drawer{
         position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: min(920px, 100%);
         height: 85vh; max-height: 85vh; border-radius: 16px 16px 0 0; box-shadow: 0 16px 40px rgba(0,0,0,.18);
-        z-index: 5; /* モバイルでも確実に最前面 */
-        overflow: hidden;
+        z-index: 5; overflow: hidden;
       }
       .drawer .links{
         height: calc(85vh - var(--drawer-head));
@@ -227,39 +224,22 @@
       return sec;
     }
 
-    // カード（childrenの1項目）
-    function makeCardItem({label, url, desc}){
-      const article = document.createElement('article');
-      article.className = 'card';
-      article.setAttribute('role','listitem');
-
-      const h = document.createElement('h3');
-      h.textContent = label;
-
-      const p = document.createElement('p');
-      p.textContent = desc || 'GitHub Pages で公開中の問題セットに移動します。';
-
-      const actions = document.createElement('div');
-      actions.className = 'actions';
-
+    // カード（childrenの1項目：カード全体が a リンク）
+    function makeCardLink({label, url, desc}){
       const a = document.createElement('a');
-      a.className = 'btn';
+      a.className = 'card';
+      a.setAttribute('role','listitem');
       a.href = url;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
-      a.setAttribute('aria-label', `${label} を開く`);
-      a.textContent = '開く';
-      // ドロワーの開閉イベントに伝播させない
+      a.innerHTML = `
+        <h3>${label}</h3>
+        <p>${desc || 'GitHub Pages で公開中の問題セットに移動します。'}</p>
+      `;
+      // 念のため：ドロワーの他イベントに伝播させない
       a.addEventListener('click', (e)=> e.stopPropagation());
       a.addEventListener('pointerdown', (e)=> e.stopPropagation());
-      a.addEventListener('touchstart', (e)=> e.stopPropagation(), {passive:true});
-      a.addEventListener('touchend', (e)=> e.stopPropagation(), {passive:true});
-
-      actions.appendChild(a);
-      article.appendChild(h);
-      article.appendChild(p);
-      article.appendChild(actions);
-      return article;
+      return a;
     }
 
     function renderCategory(cat, idx){
@@ -278,7 +258,7 @@
       grid.className = 'grid';
       grid.setAttribute('role','list');
 
-      (cat.children || []).forEach(child => grid.appendChild(makeCardItem(child)));
+      (cat.children || []).forEach(child => grid.appendChild(makeCardLink(child)));
 
       list.appendChild(sectionTitle);
       list.appendChild(grid);
